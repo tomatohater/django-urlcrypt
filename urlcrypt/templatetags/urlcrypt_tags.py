@@ -9,11 +9,11 @@ from urlcrypt.lib import generate_login_token
 register = template.Library()
 
 class EncodedURLNode(URLNode):
-    
+
     def __init__(self, user, *args, **kwargs):
         self.user = template.Variable(user)
         super(EncodedURLNode, self).__init__(*args, **kwargs)
-    
+
     def render(self, context):
         url = super(EncodedURLNode, self).render(context)
         if self.asvar:
@@ -56,10 +56,8 @@ def encoded_url(parser, token):
 
 @register.simple_tag
 def encode_url_string(user, url):
-    if RUNNING_TESTS:
-        domain = 'testserver'
-    else:
-        domain = Site.objects.get_current().domain
-    protocol, suffix = url.split("://%s" % domain)
-    token = generate_login_token(user, suffix)
-    return "%s://%s" % (protocol, reverse('urlcrypt_redirect', args=(token,)))
+    """
+    Encodes URL passed in directly as string (no url reversal).
+    """
+    token = generate_login_token(user, url)
+    return reverse('urlcrypt_redirect', args=(token,))
